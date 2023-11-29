@@ -1,5 +1,7 @@
 # ultres
 
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 Yet Another Rust Result lib for Node.js.
 
 ## Naming Things Is Hard
