@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/greguz/node-ultres.git"
+    "url": "git+https://github.com/greguz/ultres.git"
   },
   "keywords": [
     "rust",
@@ -32,7 +32,7 @@
   "author": "Giacomo Gregoletto",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/greguz/node-ultres/issues"
+    "url": "https://github.com/greguz/ultres/issues"
   },
   "homepage": "https://github.com/greguz/node-ultres#readme",
   "devDependencies": {
