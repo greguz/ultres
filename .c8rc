@@ -1,0 +1,7 @@
+{
+  "all": true,
+  "reporter": ["html", "lcov", "text"],
+  "include": [
+    "result.mjs"
+  ]
+}
