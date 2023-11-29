@@ -1,6 +1,7 @@
 # ultres
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![ci](https://github.com/greguz/ultres/actions/workflows/ci.yaml/badge.svg)](https://github.com/greguz/ultres/actions/workflows/ci.yaml)
 
 Yet Another Rust Result lib for Node.js.
 
@@ -24,7 +25,7 @@ Yup.
 npm i ultres
 ```
 
-## Example
+## Usage
 
 ### Ok basics
 
@@ -89,3 +90,166 @@ console.log(
   int(null).map(double).mapErr(up).unwrapErr()
 ) // VALUE NULL IS NOT AN INTEGER
 ```
+
+### Composing
+
+```javascript
+import Result from 'ultres'
+
+const even = value => value % 2 === 0
+  ? Result.ok(value)
+  : Result.err(`Value ${value} is not even`)
+
+const half = value => value / 2
+
+const yes = Result.ok(84).andThen(even).map(half)
+console.log(yes.unwrap()) // 42
+
+const nope = Result.ok(4.2).andThen(even).map(half)
+console.log(nope.unwrapErr()) // Value 4.2 is not even
+```
+
+### Logic
+
+```javascript
+import Result from 'ultres'
+
+const values = [
+  Result.ok(33),
+  Result.ok(9),
+  Result.err('party pooper')
+]
+
+const nope = values.reduce((left, right) => left.and(right))
+console.log(nope.unwrapErr()) // party pooper
+
+const first = values.reduce((left, right) => left.or(right))
+console.log(first.unwrap()) // 33
+```
+
+## API
+
+### `.ok([value])`
+
+- `[value]` `<*>`
+- Returns: `<Result>`
+
+### `.err([value])`
+
+- `[value]` `<*>`
+- Returns: `<Result>`
+
+### `.is(value)`
+
+- `value` `<*>`
+- Returns: `<Boolean>`
+
+### `Result::isOk` (property getter)
+
+Will be `true` when this `Result` contains a value.
+
+- Returns: `<Boolean>`
+
+### `Result::isErr` (property getter)
+
+Will be `true` when this `Result` contains an error.
+
+- Returns: `<Boolean>`
+
+### `Result::unwrap()`
+
+Returns the "ok" value.
+Throws an error if this `Result` contains an error.
+
+- Returns: `<*>`
+
+### `Result::unwrapErr()`
+
+Returns the "err" value.
+Throws an error if this `Result` doesn't contain an error.
+
+- Returns: `<*>`
+
+### `Result::ok()`
+
+Returns the "ok" value or `undefined`.
+
+- Returns: `<*>`
+
+### `Result::err()`
+
+Returns the "err" value or `undefined`.
+
+- Returns: `<*>`
+
+### `Result::expect([message])`
+
+Ensures this `Result` to contain a valid (ok) value.
+Returns a new `Result` object.
+
+- `[message]` `<String>`
+- Returns: `<Result>`
+
+### `Result::expectErr([message])`
+
+Ensures this `Result` to contain an error.
+Returns a new `Result` object.
+
+- `[message]` `<String>`
+- Returns: `<Result>`
+
+### `Result::map(fn)`
+
+Maps the "ok" value (if any) into something else.
+Returns a new `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::mapErr(fn)`
+
+Maps the "err" value (if any) into something else.
+Returns a new `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::andThen(fn)`
+
+Maps the "ok" value (if any) into another `Result`.
+Throws if the function doesn't return a valid `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<Result>`
+- Returns: `<Result>`
+
+### `Result::orElse(fn)`
+
+Maps the "err" value (if any) into another `Result`.
+Throws if the function doesn't return a valid `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<Result>`
+- Returns: `<Result>`
+
+### `Result::and(target)`
+
+Logical AND operator.
+Returns the "err" `Result` between this and the argument.
+
+- `target` `<Result>`
+- Returns: `<Result>`
+
+### `Result::or(target)`
+
+Logical OR operator.
+Returns the "ok" `Result` between this and the argument.
+
+- `target` `<Result>`
+- Returns: `<Result>`
