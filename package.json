@@ -19,7 +19,7 @@
       "require": "./result.cjs",
       "types": "./result.d.ts"
     },
-    "async": {
+    "./async": {
       "import": "./async.mjs",
       "require": "./async.cjs",
       "types": "./async.d.ts"
