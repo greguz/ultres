@@ -2,7 +2,7 @@
  * Mimics the Rust `Result`.
  * https://doc.rust-lang.org/std/result/
  */
-export interface Result<O = unknown, E = unknown> {
+export interface IResult<O = unknown, E = unknown> {
   /**
    * Will be `true` when this `Result` contains a value.
    */
@@ -33,61 +33,61 @@ export interface Result<O = unknown, E = unknown> {
    * Ensures this `Result` to contain a valid (ok) value.
    * Returns a new `Result` object.
    */
-  expect(message?: string): Result<O, never>
+  expect(message?: string): IResult<O, never>
   /**
    * Ensures this `Result` to contain an error.
    * Returns a new `Result` object.
    */
-  expectErr(message?: string): Result<never, E>
+  expectErr(message?: string): IResult<never, E>
   /**
    * Maps the "ok" value (if any) into something else.
    * Returns a new `Result` object.
    */
-  map<T>(fn: (val: O) => T): Result<T, E>
+  map<T>(fn: (val: O) => T): IResult<T, E>
   /**
    * Maps the "err" value (if any) into something else.
    * Returns a new `Result` object.
    */
-  mapErr<T>(fn: (err: E) => T): Result<O, T>
+  mapErr<T>(fn: (err: E) => T): IResult<O, T>
   /**
    * Maps the "ok" value (if any) into another `Result`.
    * Throws if the function doesn't return a valid `Result` object.
    */
-  andThen<A, B>(fn: (val: O) => Result<A, B>): Result<A, B | E>
+  andThen<A, B>(fn: (val: O) => IResult<A, B>): IResult<A, B | E>
   /**
    * Maps the "err" value (if any) into another `Result`.
    * Throws if the function doesn't return a valid `Result` object.
    */
-  orElse<A, B>(fn: (err: E) => Result<A, B>): Result<A | O, B>
+  orElse<A, B>(fn: (err: E) => IResult<A, B>): IResult<A | O, B>
   /**
    * Logical AND operator.
    * Returns the "err" `Result` between this and the argument.
    */
-  and<A, B>(result: Result<A, B>): Result<A, E | B>
+  and<A, B>(result: IResult<A, B>): IResult<A, E | B>
   /**
    * Logical OR operator.
    * Returns the "ok" `Result` between this and the argument.
    */
-  or<A, B>(result: Result<A, B>): Result<A | O, B>
+  or<A, B>(result: IResult<A, B>): IResult<A | O, B>
 }
 
-declare function is(value: unknown): value is Result<unknown, unknown>
+declare function is(value: unknown): value is IResult<unknown, unknown>
 
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
  */
-export type Ok<T> = [T] extends Result<infer O, infer E>
-  ? Result<O, E>
-  : Result<T, never>
+export type Ok<T> = [T] extends IResult<infer O, infer E>
+  ? IResult<O, E>
+  : IResult<T, never>
 
 declare function ok<T = undefined>(value?: T): Ok<T>
 
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
  */
-export type Err<T> = [T] extends Result<infer O, infer E>
-  ? Result<O, E>
-  : Result<never, T>
+export type Err<T> = [T] extends IResult<infer O, infer E>
+  ? IResult<O, E>
+  : IResult<never, T>
 
 declare function err<T = undefined>(value?: T): Err<T>
 
