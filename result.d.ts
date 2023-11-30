@@ -63,29 +63,31 @@ export interface Result<O = unknown, E = unknown> {
    * Logical AND operator.
    * Returns the "err" `Result` between this and the argument.
    */
-  and<A, B>(result: Result<A, B>): Result<A | O, B | E>
+  and<A, B>(result: Result<A, B>): Result<A, E | B>
   /**
    * Logical OR operator.
    * Returns the "ok" `Result` between this and the argument.
    */
-  or<A, B>(result: Result<A, B>): Result<A | O, B | E>
+  or<A, B>(result: Result<A, B>): Result<A | O, B>
 }
 
 declare function is(value: unknown): value is Result<unknown, unknown>
 
-export type Ok<T> = T extends any
-  ? Result<any, never>
-  : T extends Result<infer O, infer E>
-    ? Result<O, E>
-    : Result<T, never>
+/**
+ * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ */
+export type Ok<T> = [T] extends Result<infer O, infer E>
+  ? Result<O, E>
+  : Result<T, never>
 
 declare function ok<T = undefined>(value?: T): Ok<T>
 
-export type Err<T> = T extends any
-  ? Result<never, any>
-  : T extends Result<infer O, infer E>
-    ? Result<O, E>
-    : Result<never, T>
+/**
+ * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ */
+export type Err<T> = [T] extends Result<infer O, infer E>
+  ? Result<O, E>
+  : Result<never, T>
 
 declare function err<T = undefined>(value?: T): Err<T>
 

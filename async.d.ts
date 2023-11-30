@@ -52,12 +52,12 @@ export interface AsyncResult<O = unknown, E = unknown> {
    * Logical AND operator.
    * Returns the first "err" `Result` between this and the argument.
    */
-  and<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A | O, B | E>
+  and<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A, E | B>
   /**
    * Logical OR operator.
    * Returns the first "ok" `Result` between this and the argument.
    */
-  or<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A | O, B | E>
+  or<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A | O, B>
   /**
    * Handle `Promise` rejection.
    * This will make the error `unknown`.
@@ -67,19 +67,23 @@ export interface AsyncResult<O = unknown, E = unknown> {
 
 declare function is(value: unknown): value is AsyncResult<unknown, unknown>
 
-export type AsyncOk<T> = T extends any
-  ? AsyncResult<any, never>
-  : T extends MaybeAsync<AnyResult<infer O, infer E>>
+export type AsyncOk<T> = T extends PromiseLike<infer P>
+  ? AsyncOk<Awaited<P>>
+  : T extends Result<infer O, infer E>
     ? AsyncResult<O, E>
-    : AsyncResult<T, never>
+    : T extends AsyncResult<infer O, infer E>
+      ? AsyncResult<O, E>
+      : AsyncResult<T, never>
 
 declare function ok<T = undefined>(value?: T): AsyncOk<T>
 
-export type AsyncErr<T> = T extends any
-  ? AsyncResult<never, any>
-  : T extends MaybeAsync<AnyResult<infer O, infer E>>
+export type AsyncErr<T> = T extends PromiseLike<infer P>
+  ? AsyncErr<Awaited<P>>
+  : T extends Result<infer O, infer E>
     ? AsyncResult<O, E>
-    : AsyncResult<never, T>
+    : T extends AsyncResult<infer O, infer E>
+      ? AsyncResult<O, E>
+      : AsyncResult<never, T>
 
 declare function err<T = undefined>(value?: T): AsyncErr<T>
 
