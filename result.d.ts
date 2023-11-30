@@ -95,7 +95,7 @@ declare const Result: {
    */
   err: typeof err
   /**
-   * Detects `Results` objects.
+   * Detects `Result` objects.
    */
   is: typeof is
   /**

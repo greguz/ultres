@@ -2,6 +2,7 @@
   "all": true,
   "reporter": ["html", "lcov", "text"],
   "include": [
+    "async.mjs",
     "result.mjs"
   ]
 }

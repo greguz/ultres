@@ -127,19 +127,23 @@ const first = values.reduce((left, right) => left.or(right))
 console.log(first.unwrap()) // 33
 ```
 
-## API
+## `Result` API
 
-### `.ok([value])`
+```javascript
+import Result from 'ultres'
+```
+
+### `Result.ok([value])`
 
 - `[value]` `<*>`
 - Returns: `<Result>`
 
-### `.err([value])`
+### `Result.err([value])`
 
 - `[value]` `<*>`
 - Returns: `<Result>`
 
-### `.is(value)`
+### `Result.is(value)`
 
 - `value` `<*>`
 - Returns: `<Boolean>`
@@ -253,3 +257,66 @@ Returns the "ok" `Result` between this and the argument.
 
 - `target` `<Result>`
 - Returns: `<Result>`
+
+## `AsyncResult` API
+
+```javascript
+import AsyncResult from 'ultres/async'
+```
+
+### `AsyncResult.ok([value])`
+
+- `[value]` `<*>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult.err([value])`
+
+- `[value]` `<*>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult.is(value)`
+
+- `value` `<*>`
+- Returns: `<Boolean>`
+
+### `AsyncResult::unwrap()`
+
+- Returns: `<Promise>`
+
+### `AsyncResult::map(fn)`
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::mapErr(fn)`
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::andThen(fn)`
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<AsyncResult>` | `<Result>` | `<Promise>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::orElse(fn)`
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<AsyncResult>` | `<Result>` | `<Promise>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::and(target)`
+
+- `target` `<AsyncResult>` | `<Result>` | `<Promise>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::or(target)`
+
+- `target` `<AsyncResult>` | `<Result>` | `<Promise>`
+- Returns: `<AsyncResult>`
