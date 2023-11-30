@@ -1,6 +1,6 @@
 {
   "name": "ultres",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Rust Result and AsyncResult for Node.js",
   "type": "module",
   "files": [
