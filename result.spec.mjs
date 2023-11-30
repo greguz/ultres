@@ -153,3 +153,14 @@ test('err boolean', t => {
     'or'
   )
 })
+
+test('no wrappers', t => {
+  t.is(
+    Result.err(Result.ok(42)).unwrap(),
+    42
+  )
+  t.is(
+    Result.ok(Result.err(24)).unwrapErr(),
+    24
+  )
+})

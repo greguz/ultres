@@ -73,9 +73,21 @@ export interface Result<O = unknown, E = unknown> {
 
 declare function is(value: unknown): value is Result<unknown, unknown>
 
-declare function ok<O = undefined>(value?: O): Result<O, never>
+export type Ok<T> = T extends any
+  ? Result<any, never>
+  : T extends Result<infer O, infer E>
+    ? Result<O, E>
+    : Result<T, never>
 
-declare function err<E = undefined>(value?: E): Result<never, E>
+declare function ok<T = undefined>(value?: T): Ok<T>
+
+export type Err<T> = T extends any
+  ? Result<never, any>
+  : T extends Result<infer O, infer E>
+    ? Result<O, E>
+    : Result<never, T>
+
+declare function err<T = undefined>(value?: T): Err<T>
 
 declare const Result: {
   /**
