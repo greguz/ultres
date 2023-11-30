@@ -21,31 +21,41 @@ export interface AsyncResult<O = unknown, E = unknown> {
    */
   unwrap(): Promise<Result<O, E>>
   /**
-   *
+   * Map the current "ok" value into something else. Promises are supported.
+   * Returns a new `AsyncResult` object.
    */
   map<T>(fn: (val: O) => MaybeAsync<T>): AsyncResult<T, E>
   /**
-   *
+   * Map the current "err" value into something else. Promises are supported.
+   * Returns a new `AsyncResult` object.
    */
   mapErr<T>(fn: (err: E) => MaybeAsync<T>): AsyncResult<O, T>
   /**
-   *
+   * Map the current "ok" value into a new value.
+   * The map function must return a `Result` or an `AsyncResult`.
+   * Promises are also supported.
+   * Returns a new `AsyncResult` object.
    */
   andThen<A, B>(
     fn: (val: O) => MaybeAsync<AnyResult<A, B>>
   ): AsyncResult<A, B | E>
   /**
-   *
+   * Map the current "err" value into a new value.
+   * The map function must return a `Result` or an `AsyncResult`.
+   * Promises are also supported.
+   * Returns a new `AsyncResult` object.
    */
   orElse<A, B>(
     fn: (err: E) => MaybeAsync<AnyResult<A, B>>
   ): AsyncResult<A | O, B>
   /**
-   *
+   * Logical AND operator.
+   * Returns the first "err" `Result` between this and the argument.
    */
   and<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A | O, B | E>
   /**
-   *
+   * Logical OR operator.
+   * Returns the first "ok" `Result` between this and the argument.
    */
   or<A, B>(result: MaybeAsync<AnyResult<A, B>>): AsyncResult<A | O, B | E>
   /**
