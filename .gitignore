@@ -1,7 +1,10 @@
 .*
 !.c8rc
+!.github
 !.gitignore
+async.cjs
 coverage
 node_modules
 package-lock.json
 result.cjs
+*.tgz

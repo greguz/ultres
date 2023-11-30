@@ -17,6 +17,10 @@ const wasErr = () => stop('Result is err')
 const expectedOk = message => stop(message || 'Expected ok Result')
 
 const ok = value => {
+  if (is(value)) {
+    return value
+  }
+
   const eject = () => value
   const copy = () => ok(value)
   return {
@@ -40,6 +44,10 @@ const ok = value => {
 }
 
 const err = value => {
+  if (is(value)) {
+    return value
+  }
+
   const eject = () => value
   const copy = () => err(value)
   return {

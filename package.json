@@ -1,9 +1,12 @@
 {
   "name": "ultres",
   "version": "0.1.0",
-  "description": "Rust Result for Node.js",
+  "description": "Rust Result and AsyncResult for Node.js",
   "type": "module",
   "files": [
+    "async.cjs",
+    "async.d.ts",
+    "async.mjs",
     "result.cjs",
     "result.d.ts",
     "result.mjs"
@@ -11,9 +14,16 @@
   "main": "./result.cjs",
   "types": "./result.d.ts",
   "exports": {
-    "import": "./result.mjs",
-    "require": "./result.cjs",
-    "types": "./result.d.ts"
+    ".": {
+      "import": "./result.mjs",
+      "require": "./result.cjs",
+      "types": "./result.d.ts"
+    },
+    "async": {
+      "import": "./async.mjs",
+      "require": "./async.cjs",
+      "types": "./async.d.ts"
+    }
   },
   "scripts": {
     "build": "rollup -c",
@@ -38,7 +48,7 @@
   "devDependencies": {
     "ava": "^5.3.1",
     "c8": "^8.0.1",
-    "rollup": "^4.5.1",
+    "rollup": "^4.6.1",
     "standard": "^17.1.0"
   }
 }

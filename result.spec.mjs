@@ -2,7 +2,7 @@ import test from 'ava'
 
 import Result from './result.mjs'
 
-test('ok basic', t => {
+test('ok', t => {
   t.plan(9)
 
   const result = Result.ok(42)
@@ -22,63 +22,7 @@ test('ok basic', t => {
   t.is(result.err(), undefined)
 })
 
-test('ok expect', t => {
-  t.plan(4)
-
-  const result = Result.ok(42)
-  const expected = result.expect()
-
-  t.false(result === expected)
-  t.is(result.unwrap(), 42)
-  t.is(expected.unwrap(), 42)
-  t.throws(() => result.expectErr())
-})
-
-test('ok map', t => {
-  t.plan(5)
-
-  const result = Result.ok(21)
-  const mapped = result.map(value => {
-    t.is(value, 21)
-    return value * 2
-  })
-
-  t.false(result === mapped)
-  t.is(result.unwrap(), 21)
-  t.is(mapped.unwrap(), 42)
-  t.is(
-    result.mapErr(() => t.fail()).unwrap(),
-    21
-  )
-})
-
-test('ok result', t => {
-  t.plan(3)
-
-  const result = Result.ok('source')
-  const update = result.andThen(() => Result.ok('target'))
-  t.is(update.ok(), 'target')
-  t.throws(() => result.andThen(() => null))
-
-  const noop = result.orElse(() => t.fail())
-  t.is(noop.ok(), 'source')
-})
-
-test('ok boolean', t => {
-  t.plan(2)
-
-  const result = Result.ok('ok')
-  t.is(
-    result.and(Result.ok('and')).ok(),
-    'and'
-  )
-  t.is(
-    result.or(Result.err('or')).ok(),
-    'ok'
-  )
-})
-
-test('err basic', t => {
+test('err', t => {
   t.plan(9)
 
   const result = Result.err('nope')
@@ -98,58 +42,93 @@ test('err basic', t => {
   t.is(result.err(), 'nope')
 })
 
-test('err expect', t => {
-  t.plan(4)
-
-  const result = Result.err('nope')
-  const expected = result.expectErr()
-
-  t.false(result === expected)
-  t.is(result.unwrapErr(), 'nope')
-  t.is(expected.unwrapErr(), 'nope')
-  t.throws(() => result.expect())
-})
-
-test('err map', t => {
-  t.plan(5)
-
-  const result = Result.err('no')
-  const mapped = result.mapErr(value => {
-    t.is(value, 'no')
-    return 'Oh ' + value
-  })
-
-  t.false(result === mapped)
-  t.is(result.unwrapErr(), 'no')
-  t.is(mapped.unwrapErr(), 'Oh no')
-  t.is(
-    result.map(() => t.fail()).unwrapErr(),
-    'no'
-  )
-})
-
-test('err result', t => {
-  t.plan(3)
-
-  const result = Result.err('source')
-  const update = result.orElse(() => Result.ok('target'))
-  t.is(update.ok(), 'target')
-  t.throws(() => result.orElse(() => null))
-
-  const noop = result.andThen(() => t.fail())
-  t.is(noop.err(), 'source')
-})
-
-test('err boolean', t => {
+test('no wrappers', t => {
   t.plan(2)
 
-  const result = Result.err('err')
   t.is(
-    result.and(Result.ok('and')).err(),
-    'err'
+    Result.err(Result.ok('one')).unwrap(),
+    'one'
   )
   t.is(
-    result.or(Result.err('or')).err(),
-    'or'
+    Result.ok(Result.ok(Result.err('two'))).unwrapErr(),
+    'two'
   )
+})
+
+test('expect', t => {
+  t.plan(2)
+
+  t.is(Result.ok('ok').expect().unwrap(), 'ok')
+  t.throws(() => Result.err().expect())
+})
+
+test('expectErr', t => {
+  t.plan(2)
+
+  t.is(Result.err('err').expectErr().unwrapErr(), 'err')
+  t.throws(() => Result.ok().expectErr())
+})
+
+test('map', t => {
+  t.plan(2)
+
+  t.is(Result.ok('YES').map(v => v.toLowerCase()).unwrap(), 'yes')
+  t.is(Result.err('noop').map(() => t.fail()).unwrapErr(), 'noop')
+})
+
+test('mapErr', t => {
+  t.plan(2)
+
+  t.is(Result.err('nope').mapErr(v => v.toUpperCase()).unwrapErr(), 'NOPE')
+  t.is(Result.ok('noop').mapErr(() => t.fail()).unwrap(), 'noop')
+})
+
+test('andThen', t => {
+  t.plan(3)
+
+  t.is(
+    Result.ok('YES').andThen(v => Result.ok(v.toLowerCase())).unwrap(),
+    'yes'
+  )
+  t.throws(
+    () => Result.ok('YES').andThen(v => v.toLowerCase())
+  )
+  t.is(
+    Result.err('noop').andThen(() => t.fail()).unwrapErr(),
+    'noop'
+  )
+})
+
+test('orElse', t => {
+  t.plan(3)
+
+  t.is(
+    Result.err('nope').orElse(v => Result.ok(v.toUpperCase())).unwrap(),
+    'NOPE'
+  )
+  t.throws(
+    () => Result.err('nope').orElse(v => v.toUpperCase())
+  )
+  t.is(
+    Result.ok('noop').orElse(() => t.fail()).unwrap(),
+    'noop'
+  )
+})
+
+test('and', t => {
+  t.plan(4)
+
+  t.is(Result.ok('left').and(Result.ok('right')).unwrap(), 'right')
+  t.is(Result.err('left').and(Result.ok('right')).unwrapErr(), 'left')
+  t.is(Result.ok('left').and(Result.err('right')).unwrapErr(), 'right')
+  t.is(Result.err('left').and(Result.err('right')).unwrapErr(), 'left')
+})
+
+test('or', t => {
+  t.plan(4)
+
+  t.is(Result.ok('left').or(Result.ok('right')).unwrap(), 'left')
+  t.is(Result.err('left').or(Result.ok('right')).unwrap(), 'right')
+  t.is(Result.ok('left').or(Result.err('right')).unwrap(), 'left')
+  t.is(Result.err('left').or(Result.err('right')).unwrapErr(), 'right')
 })
