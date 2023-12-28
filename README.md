@@ -82,6 +82,8 @@ console.log(errResult.unwrapErr().message) // Oh no
 import Result from 'ultres'
 ```
 
+All APIs are the exact replica of Rust's [`Result`](https://doc.rust-lang.org/std/result/) object. Only the case was changed to adapt better to JS standards.
+
 ### `Result.ok([value])`
 
 - `[value]` `<*>`
@@ -213,6 +215,10 @@ Returns the first "ok" `Result` between this and the argument.
 import AsyncResult from 'ultres/async'
 ```
 
+This is technically an `async` wrapper of a `Result` object.
+
+The `unwrap` method returns a `Promise` that resolves with its internal [`Result`](#result-api) object.
+
 ### `AsyncResult.ok([value])`
 
 Wrap a value into a positive `AsyncResult`.
@@ -303,3 +309,9 @@ The `target` can be a `Result`, an `AsyncResult`, or a `Promise` that resolves w
 
 - `target` `<AsyncResult>` | `<Result>` | `<Promise>`
 - Returns: `<AsyncResult>`
+
+## Donate
+
+Thank you!
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/greguz)
