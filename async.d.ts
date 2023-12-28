@@ -67,21 +67,27 @@ export interface IAsyncResult<O = unknown, E = unknown> {
 
 declare function is(value: unknown): value is IAsyncResult<unknown, unknown>
 
-export type AsyncOk<T> = T extends PromiseLike<infer P>
+/**
+ * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ */
+export type AsyncOk<T> = [T] extends [PromiseLike<infer P>]
   ? AsyncOk<Awaited<P>>
-  : T extends IResult<infer O, infer E>
+  : [T] extends [IResult<infer O, infer E>]
     ? IAsyncResult<O, E>
-    : T extends IAsyncResult<infer O, infer E>
+    : [T] extends [IAsyncResult<infer O, infer E>]
       ? IAsyncResult<O, E>
       : IAsyncResult<T, never>
 
 declare function ok<T = undefined>(value?: T): AsyncOk<T>
 
-export type AsyncErr<T> = T extends PromiseLike<infer P>
+/**
+ * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ */
+export type AsyncErr<T> = [T] extends [PromiseLike<infer P>]
   ? AsyncErr<Awaited<P>>
-  : T extends IResult<infer O, infer E>
+  : [T] extends [IResult<infer O, infer E>]
     ? IAsyncResult<O, E>
-    : T extends IAsyncResult<infer O, infer E>
+    : [T] extends [IAsyncResult<infer O, infer E>]
       ? IAsyncResult<O, E>
       : IAsyncResult<never, T>
 
