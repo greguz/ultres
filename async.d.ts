@@ -78,7 +78,8 @@ export type AsyncOk<T> = [T] extends [PromiseLike<infer P>]
       ? IAsyncResult<O, E>
       : IAsyncResult<T, never>
 
-declare function ok<T = undefined>(value?: T): AsyncOk<T>
+declare function ok(): AsyncOk<undefined>
+declare function ok<T>(value: T): AsyncOk<T>
 
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
@@ -91,7 +92,8 @@ export type AsyncErr<T> = [T] extends [PromiseLike<infer P>]
       ? IAsyncResult<O, E>
       : IAsyncResult<never, T>
 
-declare function err<T = undefined>(value?: T): AsyncErr<T>
+declare function err(): AsyncErr<undefined>
+declare function err<T>(value: T): AsyncErr<T>
 
 declare const AsyncResult: {
   /**

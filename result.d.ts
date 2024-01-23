@@ -80,7 +80,8 @@ export type Ok<T> = [T] extends [IResult<infer O, infer E>]
   ? IResult<O, E>
   : IResult<T, never>
 
-declare function ok<T = undefined>(value?: T): Ok<T>
+declare function ok(): Ok<undefined>
+declare function ok<T>(value: T): Ok<T>
 
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
@@ -89,7 +90,8 @@ export type Err<T> = [T] extends [IResult<infer O, infer E>]
   ? IResult<O, E>
   : IResult<never, T>
 
-declare function err<T = undefined>(value?: T): Err<T>
+declare function err(): Err<undefined>
+declare function err<T>(value: T): Err<T>
 
 declare const Result: {
   /**
