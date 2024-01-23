@@ -76,7 +76,7 @@ declare function is(value: unknown): value is IResult<unknown, unknown>
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
  */
-export type Ok<T> = [T] extends IResult<infer O, infer E>
+export type Ok<T> = [T] extends [IResult<infer O, infer E>]
   ? IResult<O, E>
   : IResult<T, never>
 
@@ -85,7 +85,7 @@ declare function ok<T = undefined>(value?: T): Ok<T>
 /**
  * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
  */
-export type Err<T> = [T] extends IResult<infer O, infer E>
+export type Err<T> = [T] extends [IResult<infer O, infer E>]
   ? IResult<O, E>
   : IResult<never, T>
 
