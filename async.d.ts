@@ -63,6 +63,16 @@ export interface IAsyncResult<O = unknown, E = unknown> {
    * This will make the error `unknown`.
    */
   catchErr(): IAsyncResult<O, unknown>
+  /**
+   * Perform a side-effect with the "ok" value.
+   * The `AsyncResult` status will left untouched.
+   */
+  tap(fn: (val: O) => any): IAsyncResult<O, E>
+  /**
+   * Perform a side-effect with the "err" value.
+   * The `AsyncResult` status will left untouched.
+   */
+  tapErr(fn: (err: E) => any): IAsyncResult<O, E>
 }
 
 declare function is(value: unknown): value is IAsyncResult<unknown, unknown>

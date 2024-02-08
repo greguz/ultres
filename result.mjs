@@ -39,7 +39,9 @@ const ok = value => {
     andThen: fn => ensure(fn(value)),
     orElse: copy,
     and: ensure,
-    or: copy
+    or: copy,
+    tap: fn => { fn(value); return copy() },
+    tapErr: copy
   }
 }
 
@@ -66,7 +68,9 @@ const err = value => {
     andThen: copy,
     orElse: fn => ensure(fn(value)),
     and: copy,
-    or: ensure
+    or: ensure,
+    tap: copy,
+    tapErr: fn => { fn(value); return copy() }
   }
 }
 

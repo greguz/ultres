@@ -50,6 +50,20 @@ const wrap = promise => ({
       ([left, right]) => left.or(right)
     )
   ),
+  tap: fn => wrap(
+    promise.then(
+      r => r.isOk
+        ? Promise.resolve(fn(r.unwrap())).then(() => r)
+        : r
+    )
+  ),
+  tapErr: fn => wrap(
+    promise.then(
+      r => r.isErr
+        ? Promise.resolve(fn(r.unwrapErr())).then(() => r)
+        : r
+    )
+  ),
   catchErr: () => wrap(promise.catch(Result.err))
 })
 

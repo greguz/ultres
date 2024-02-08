@@ -4,9 +4,9 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![ci](https://github.com/greguz/ultres/actions/workflows/ci.yaml/badge.svg)](https://github.com/greguz/ultres/actions/workflows/ci.yaml)
 
-Rust Result and AsyncResult for Node.js
+Rust `Result` and `AsyncResult` for Node.js.
 
-## Naming Things Is Hard
+## Naming Things Is Hard™
 
 Result > Res ult > ult Res > **Ultres**.
 
@@ -15,10 +15,10 @@ Yup.
 ## Why
 
 - **Zero dependencies**: banana only, no gorilla or jungle whatsoever
-- **FP**: just dead-simple closures
+- **FP**: source is just a set of dead-simple closures
 - **ESM**: native ESM package
 - **CommonJS**: support for older runtimes
-- **TypeScript**: also dead-simple typings without complex conditional inferences
+- **TypeScript**: first-class support
 
 ## Install
 
@@ -209,6 +209,26 @@ Returns the first "ok" `Result` between this and the argument.
 - `target` `<Result>`
 - Returns: `<Result>`
 
+### `Result::tap(fn)`
+
+Perform a side-effect with the "ok" value.
+The `Result` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::tapErr(fn)`
+
+Perform a side-effect with the "err" value.
+The `Result` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
 ## `AsyncResult` API
 
 ```javascript
@@ -309,6 +329,81 @@ The `target` can be a `Result`, an `AsyncResult`, or a `Promise` that resolves w
 
 - `target` `<AsyncResult>` | `<Result>` | `<Promise>`
 - Returns: `<AsyncResult>`
+
+### `AsyncResult::tap(fn)`
+
+Perform a side-effect with the "ok" value.
+The `AsyncResult` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<AsyncResult>`
+
+### `AsyncResult::tapErr(fn)`
+
+Perform a side-effect with the "err" value.
+The `AsyncResult` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<AsyncResult>`
+
+## FAQ
+
+### Why sometimes returned types seem overly complicated?
+
+When a `Result` chain starts from a raw value (either `Result.ok(value)` or
+`Result.err(value)`) TypeScript should be more than happy to keep everything
+in line. The problem arise when there's an inferred union type between two or more
+`Result` types.
+
+Let's take a look to this function:
+
+```typescript
+function randomResult () {
+  if (Math.random() < 0.5) {
+    return Result.ok(true)
+  } else {
+    return Result.err(new Error('This is an handled error'))
+  }
+}
+```
+
+The resulting type will be `IResult<boolean, never> | IResult<never, Error>`.
+This is _technically_ correct, but any operation with this type will complicate
+even more the outcome.
+
+To "fix" this problem we need to tell TypeScript how to "unify" those types.
+
+```typescript
+import { type IResult } from 'ultres'
+
+function randomResult (): IResult<boolean, Error> { // add the return type
+  if (Math.random() < 0.5) {
+    return Result.ok(true)
+  } else {
+    return Result.err(new Error('This is an handled error'))
+  }
+}
+```
+
+### Why I cannot create a `IResult<any, any>` from an `any`-types value?
+
+The `ultres` lib uses generics (within `Ok`, `Err`, `AsyncOk` and `AsyncErr`
+types) in a [non-distributive](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types) way. A non-distributive conditional type is unable to use `any` as input.
+
+The only way to "fix" the issue is to set `IResult<any, any>` or
+`IAsyncResult<any, any>` type explicitly.
+
+```typescript
+import Result, { type IResult } from 'ultres'
+
+const nope = Result.ok<any>(4) // this will be `IResult<unknown, unknown>`
+
+const fixed: IResult<any, any> = Result.ok(2) // type is explicit
+```
 
 ## Donate
 

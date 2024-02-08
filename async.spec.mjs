@@ -186,3 +186,31 @@ test('or', async t => {
 
   await t.throwsAsync(unwrap(AsyncResult.err().or(null)))
 })
+
+test('tap', async t => {
+  t.plan(3)
+
+  const ok = await unwrap(
+    AsyncResult.ok('yes').tap(v => t.is(v, 'yes'))
+  )
+  t.is(ok, 'yes')
+
+  const err = await unwrapErr(
+    AsyncResult.err('no').tap(() => t.fail())
+  )
+  t.is(err, 'no')
+})
+
+test('tapErr', async t => {
+  t.plan(3)
+
+  const ok = await unwrap(
+    AsyncResult.ok('yes').tapErr(() => t.fail())
+  )
+  t.is(ok, 'yes')
+
+  const err = await unwrapErr(
+    AsyncResult.err('no').tapErr(v => t.is(v, 'no'))
+  )
+  t.is(err, 'no')
+})

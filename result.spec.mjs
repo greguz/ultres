@@ -132,3 +132,35 @@ test('or', t => {
   t.is(Result.ok('left').or(Result.err('right')).unwrap(), 'left')
   t.is(Result.err('left').or(Result.err('right')).unwrapErr(), 'right')
 })
+
+test('tap', t => {
+  t.plan(3)
+  t.is(
+    Result.ok('ok')
+      .tap(v => t.is(v, 'ok'))
+      .unwrap(),
+    'ok'
+  )
+  t.is(
+    Result.err('nope')
+      .tap(() => t.fail())
+      .unwrapErr(),
+    'nope'
+  )
+})
+
+test('tapErr', t => {
+  t.plan(3)
+  t.is(
+    Result.ok('ok')
+      .tapErr(() => t.fail())
+      .unwrap(),
+    'ok'
+  )
+  t.is(
+    Result.err('nope')
+      .tapErr(v => t.is(v, 'nope'))
+      .unwrapErr(),
+    'nope'
+  )
+})

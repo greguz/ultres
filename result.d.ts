@@ -69,6 +69,16 @@ export interface IResult<O = unknown, E = unknown> {
    * Returns the "ok" `Result` between this and the argument.
    */
   or<A, B>(result: IResult<A, B>): IResult<A | O, B>
+  /**
+   * Perform a side-effect with the "ok" value.
+   * The `Result` status will left untouched.
+   */
+  tap(fn: (val: O) => any): IResult<O, E>
+  /**
+   * Perform a side-effect with the "err" value.
+   * The `Result` status will left untouched.
+   */
+  tapErr(fn: (err: E) => any): IResult<O, E>
 }
 
 declare function is(value: unknown): value is IResult<unknown, unknown>
