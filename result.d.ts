@@ -81,40 +81,31 @@ export interface IResult<O = unknown, E = unknown> {
   tapErr(fn: (err: E) => any): IResult<O, E>
 }
 
+/**
+ * Detects `Result` objects.
+ */
 declare function is(value: unknown): value is IResult<unknown, unknown>
 
 /**
- * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ * Wrap a value into a `Result` object.
  */
-export type Ok<T> = [T] extends [IResult<infer O, infer E>]
-  ? IResult<O, E>
-  : IResult<T, never>
-
-declare function ok(): Ok<undefined>
-declare function ok<T>(value: T): Ok<T>
+declare function ok(): IResult<undefined, never>
+declare function ok<O, E>(result: IResult<O, E>): IResult<O, E>
+declare function ok<T>(value: T): IResult<T, never>
 
 /**
- * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ * Wrap an error into a `Result` object.
  */
-export type Err<T> = [T] extends [IResult<infer O, infer E>]
-  ? IResult<O, E>
-  : IResult<never, T>
+declare function err(): IResult<never, undefined>
+declare function err<O, E>(result: IResult<O, E>): IResult<O, E>
+declare function err<T>(value: T): IResult<never, T>
 
-declare function err(): Err<undefined>
-declare function err<T>(value: T): Err<T>
-
+/**
+ * Default exported object.
+ */
 declare const Result: {
-  /**
-   * Wrap an error into a `Result` object.
-   */
   err: typeof err
-  /**
-   * Detects `Result` objects.
-   */
   is: typeof is
-  /**
-   * Wrap a value into a `Result` object.
-   */
   ok: typeof ok
 }
 

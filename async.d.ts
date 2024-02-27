@@ -75,48 +75,33 @@ export interface IAsyncResult<O = unknown, E = unknown> {
   tapErr(fn: (err: E) => any): IAsyncResult<O, E>
 }
 
+/**
+ * Detects `AsyncResult` objects.
+ */
 declare function is(value: unknown): value is IAsyncResult<unknown, unknown>
 
 /**
- * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ * Wraps a value into a positive (ok) `AsyncResult` object.
  */
-export type AsyncOk<T> = [T] extends [PromiseLike<infer P>]
-  ? AsyncOk<Awaited<P>>
-  : [T] extends [IResult<infer O, infer E>]
-    ? IAsyncResult<O, E>
-    : [T] extends [IAsyncResult<infer O, infer E>]
-      ? IAsyncResult<O, E>
-      : IAsyncResult<T, never>
-
-declare function ok(): AsyncOk<undefined>
-declare function ok<T>(value: T): AsyncOk<T>
+declare function ok(): IAsyncResult<undefined, never>
+declare function ok<O, E>(result: MaybeAsync<AnyResult<O, E>>): IAsyncResult<O, E>
+declare function ok<T>(value: Promise<T>): IAsyncResult<T, never>
+declare function ok<T>(value: T): IAsyncResult<T, never>
 
 /**
- * https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+ * Wraps a value into a negative (err) `AsyncResult` object.
  */
-export type AsyncErr<T> = [T] extends [PromiseLike<infer P>]
-  ? AsyncErr<Awaited<P>>
-  : [T] extends [IResult<infer O, infer E>]
-    ? IAsyncResult<O, E>
-    : [T] extends [IAsyncResult<infer O, infer E>]
-      ? IAsyncResult<O, E>
-      : IAsyncResult<never, T>
+declare function err(): IAsyncResult<never, undefined>
+declare function err<O, E>(result: MaybeAsync<AnyResult<O, E>>): IAsyncResult<O, E>
+declare function err<T>(value: Promise<T>): IAsyncResult<never, T>
+declare function err<T>(value: T): IAsyncResult<never, T>
 
-declare function err(): AsyncErr<undefined>
-declare function err<T>(value: T): AsyncErr<T>
-
+/**
+ * Default exported object.
+ */
 declare const AsyncResult: {
-  /**
-   *
-   */
   err: typeof err
-  /**
-   * Detects `AsyncResult` objects.
-   */
   is: typeof is
-  /**
-   *
-   */
   ok: typeof ok
 }
 

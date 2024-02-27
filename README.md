@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/ultres)](https://www.npmjs.com/package/ultres)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![ci](https://github.com/greguz/ultres/actions/workflows/ci.yaml/badge.svg)](https://github.com/greguz/ultres/actions/workflows/ci.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/greguz/ultres/badge.svg?branch=master)](https://coveralls.io/github/greguz/ultres?branch=master)
 
 Rust `Result` and `AsyncResult` for Node.js.
 
@@ -349,61 +350,6 @@ The `AsyncResult` status will left untouched.
   - `value` `<*>`
   - Returns: `<*>`
 - Returns: `<AsyncResult>`
-
-## FAQ
-
-### Why sometimes returned types seem overly complicated?
-
-When a `Result` chain starts from a raw value (either `Result.ok(value)` or
-`Result.err(value)`) TypeScript should be more than happy to keep everything
-in line. The problem arise when there's an inferred union type between two or more
-`Result` types.
-
-Let's take a look to this function:
-
-```typescript
-function randomResult () {
-  if (Math.random() < 0.5) {
-    return Result.ok(true)
-  } else {
-    return Result.err(new Error('This is an handled error'))
-  }
-}
-```
-
-The resulting type will be `IResult<boolean, never> | IResult<never, Error>`.
-This is _technically_ correct, but any operation with this type will complicate
-even more the outcome.
-
-To "fix" this problem we need to tell TypeScript how to "unify" those types.
-
-```typescript
-import { type IResult } from 'ultres'
-
-function randomResult (): IResult<boolean, Error> { // add the return type
-  if (Math.random() < 0.5) {
-    return Result.ok(true)
-  } else {
-    return Result.err(new Error('This is an handled error'))
-  }
-}
-```
-
-### Why I cannot create a `IResult<any, any>` from an `any`-types value?
-
-The `ultres` lib uses generics (within `Ok`, `Err`, `AsyncOk` and `AsyncErr`
-types) in a [non-distributive](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types) way. A non-distributive conditional type is unable to use `any` as input.
-
-The only way to "fix" the issue is to set `IResult<any, any>` or
-`IAsyncResult<any, any>` type explicitly.
-
-```typescript
-import Result, { type IResult } from 'ultres'
-
-const nope = Result.ok<any>(4) // this will be `IResult<unknown, unknown>`
-
-const fixed: IResult<any, any> = Result.ok(2) // type is explicit
-```
 
 ## Donate
 
