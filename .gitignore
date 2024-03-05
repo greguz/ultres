@@ -2,6 +2,7 @@
 !.c8rc
 !.github
 !.gitignore
+!.nojekyll
 async.cjs
 coverage
 node_modules
