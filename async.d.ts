@@ -17,9 +17,33 @@ export type AnyResult<O, E> = IAsyncResult<O, E> | IResult<O, E>
  */
 export interface IAsyncResult<O = unknown, E = unknown> {
   /**
-   * Resolves with a raw `Result`.
+   * Returns a Promise that resolves into the "ok" value.
+   * A rejection will happens if the `AsyncResult` is _not ok_.
    */
-  unwrap(): Promise<IResult<O, E>>
+  unwrap(): Promise<O>
+  /**
+   * Returns a Promise that resolves into the "err" value.
+   * A rejection will happens if the `AsyncResult` is _ok_.
+   */
+  unwrapErr(): Promise<E>
+  /**
+   * Returns a Promise that resolves into the "ok" value or `undefined`.
+   */
+  ok(): Promise<O | undefined>
+  /**
+   * Returns a Promise that resolves into the "err" value or `undefined`.
+   */
+  err(): Promise<E | undefined>
+  /**
+   * Force the `AsyncResult` to be "ok", if not, a rejection will happen during
+   * the `AsyncResult` consuming.
+   */
+  expect(message?: string): IAsyncResult<O, never>
+  /**
+   * Force the `AsyncResult` to be "err", if not, a rejection will happen during
+   * the `AsyncResult` consuming.
+   */
+  expectErr(message?: string): IAsyncResult<never, E>
   /**
    * Map the current "ok" value into something else. Promises are supported.
    * Returns a new `AsyncResult` object.
@@ -59,11 +83,6 @@ export interface IAsyncResult<O = unknown, E = unknown> {
    */
   or<A, B>(result: MaybeAsync<AnyResult<A, B>>): IAsyncResult<A | O, B>
   /**
-   * Handle `Promise` rejection.
-   * This will make the error `unknown`.
-   */
-  catchErr(): IAsyncResult<O, unknown>
-  /**
    * Perform a side-effect with the "ok" value.
    * The `AsyncResult` status will left untouched.
    */
@@ -73,6 +92,15 @@ export interface IAsyncResult<O = unknown, E = unknown> {
    * The `AsyncResult` status will left untouched.
    */
   tapErr(fn: (err: E) => any): IAsyncResult<O, E>
+  /**
+   * Unwrap into a (sync) `Result` object.
+   */
+  unwrapResult(): Promise<IResult<O, E>>
+  /**
+   * Catch Promise rejection up to this point of the chain.
+   * This will change the (possible) error type to `unknown`.
+   */
+  catchRejection(): IAsyncResult<O, unknown>
 }
 
 /**

@@ -62,19 +62,17 @@ const process = async value => {
   return Result.ok(new Date())
 }
 
-const result = await AsyncResult.ok(integer(2))
+const date = await AsyncResult.ok(integer(2))
   .andThen(process)
-  .unwrap() // process 2 items
+  .unwrap() // logs 'process 2 items'
 
-console.log(result.isOk) // true
-console.log(result.unwrap()) // 2023-11-30T13:25:59.196Z
+console.log(date) // 2023-11-30T13:25:59.196Z
 
-const errResult = await AsyncResult.ok(Promise.reject(new Error('Oh no')))
-  .catchErr()
-  .unwrap()
+const errInstance = await AsyncResult.ok(Promise.reject(new Error('Oh no')))
+  .catchRejection()
+  .unwrapErr()
 
-console.log(errResult.isErr) // true
-console.log(errResult.unwrapErr().message) // Oh no
+console.log(errInstance.message) // Oh no
 ```
 
 ## Donate
