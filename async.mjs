@@ -5,13 +5,28 @@ const ultres = Symbol.for('ultres/async')
 const is = value => ultres in Object(value)
 
 const from = value => Promise.resolve(value).then(
-  obj => is(obj) ? obj.unwrap() : obj
+  obj => is(obj) ? obj.unwrapResult() : obj
 )
+
+const passthrough = v => v
+
+const rUnwrap = r => r.unwrap()
+
+const rUnwrapErr = r => r.unwrapErr()
+
+const rOk = r => r.ok()
+
+const rErr = r => r.err()
 
 const wrap = promise => ({
   [Symbol.toStringTag]: 'AsyncResult',
   [ultres]: true,
-  unwrap: () => promise,
+  unwrap: () => promise.then(rUnwrap),
+  unwrapErr: () => promise.then(rUnwrapErr),
+  ok: () => promise.then(rOk),
+  err: () => promise.then(rErr),
+  expect: message => wrap(promise.then(r => r.expect(message))),
+  expectErr: message => wrap(promise.then(r => r.expectErr(message))),
   map: fn => wrap(
     promise.then(
       r => r.isOk
@@ -64,7 +79,8 @@ const wrap = promise => ({
         : r
     )
   ),
-  catchErr: () => wrap(promise.catch(Result.err))
+  unwrapResult: () => promise,
+  catchRejection: () => wrap(promise.then(passthrough, Result.err))
 })
 
 const ok = value => is(value)

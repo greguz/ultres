@@ -4,7 +4,10 @@ export default [
     output: {
       file: './async.cjs',
       format: 'cjs'
-    }
+    },
+    plugins: [
+      useLocalImport()
+    ]
   },
   {
     input: './result.mjs',
@@ -14,3 +17,16 @@ export default [
     }
   }
 ]
+
+function useLocalImport () {
+  return {
+    name: 'useLocalImport',
+    resolveId (source) {
+      if (source === './result.mjs') {
+        return { id: './result.cjs', external: true }
+      } else {
+        return null
+      }
+    }
+  }
+}
