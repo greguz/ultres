@@ -1,10 +1,15 @@
 # `Result`
 
+An object representation of a successfull or errored status.
+
 ## Basic usage
+
+The whole package `ultres` package exports just three functions: `ok`, `err`, and `is`. The first two declares a new `Result` instance, the other detects a `Result` instance.
 
 ```javascript
 import Result from 'ultres'
 
+// Declare two different results
 const yes = Result.ok('Hello world')
 const no = Result.err('Oh no')
 
@@ -14,12 +19,17 @@ yes.isErr // false
 no.isOk   // false
 no.isErr  // true
 
+// Detect results
 Result.is(yes)  // true
 Result.is(no)   // true
 Result.is({})   // false
 ```
 
 ## Consume
+
+Those methods will let you access the internal value.
+
+The `.unwrap()` and `.unwrapErr()` methods will throw an error if the `Result` status is "err" or "ok" respectively. The `.ok()` and `.err()` will let you access the internal value without any active check.
 
 ```javascript
 yes.unwrap()    // 'Hello world'
@@ -33,7 +43,13 @@ no.ok()         // undefined
 no.err()        // 'Oh no'
 ```
 
+> **WARNING**: A `Result` instance should always be consumed (see the [side effects](#side-effects) section).
+
 ## Expectations
+
+Those methods are similar to `.unwrap()` and `.unwrapErr()`. They let you access the interval value with an active check, but also let you to customize the error message.
+
+All methods return a new (immutable) `Result` instance.
 
 ```javascript
 const message = 'I was expecting something else'
@@ -49,6 +65,10 @@ no.expectErr(message)   // nothing changes
 
 ## Map
 
+Transform the `Result` value into something else. The `.map()` method will only map "ok" values, and the `.mapErr()` will only map "err" values.
+
+All methods return a new (immutable) `Result` instance.
+
 ```javascript
 const up = v => v.toUpperCase()
 
@@ -60,6 +80,10 @@ no.mapErr(up)   // .unwrapErr() will return 'OH NO'
 ```
 
 ## Compose
+
+Compose other `Result` functions. Those methods will let you apply map functions that return other `Result` instances.
+
+All methods return a new (immutable) `Result` instance.
 
 ```javascript
 const goon = v => Result.ok(v.toUpperCase())
@@ -75,6 +99,10 @@ no.andThen(stop)  // nothing changes
 ```
 
 ## Boolean logic
+
+Reduce two different `Result` instances by their current status.
+
+All methods return a new (immutable) `Result` instance.
 
 ```javascript
 yes.and(no).isOk  // false (keep right result)
@@ -92,6 +120,10 @@ no.or(no).isOk    // false (keep right result)
 
 ## Side effects
 
+Perform a side effect (run a function with the `Result` value as argument) when the `Result` is consumed.
+
+All methods return a new (immutable) `Result` instance.
+
 ```javascript
 const log = v => console.log('My value: ' + v)
 
@@ -101,3 +133,158 @@ yes.tapErr(log).unwrap()    // nothing happens
 no.tap(log).unwrapErr()     // nothing happens
 no.tapErr(log).unwrapErr()  // logs 'My value: Oh no'
 ```
+
+> **WARNING**: The side effect won't run if the `Result` is **not** consumed.
+
+## API
+
+### `Result.ok([value])`
+
+Creates an "ok" `Result` instance.
+
+- `[value]` `<*>`
+- Returns: `<Result>`
+
+### `Result.err([value])`
+
+Creates an "err" `Result` instance.
+
+- `[value]` `<*>`
+- Returns: `<Result>`
+
+### `Result.is(value)`
+
+Returns `true` when `value` is a `Result` instance.
+
+- `value` `<*>`
+- Returns: `<Boolean>`
+
+### `Result::isOk` (property getter)
+
+Will be `true` when this `Result` contains a value.
+
+- Returns: `<Boolean>`
+
+### `Result::isErr` (property getter)
+
+Will be `true` when this `Result` contains an error.
+
+- Returns: `<Boolean>`
+
+### `Result::unwrap()`
+
+Returns the "ok" value.
+Throws an error if this `Result` contains an error.
+
+- Returns: `<*>`
+
+### `Result::unwrapErr()`
+
+Returns the "err" value.
+Throws an error if this `Result` doesn't contain an error.
+
+- Returns: `<*>`
+
+### `Result::ok()`
+
+Returns the "ok" value or `undefined`.
+
+- Returns: `<*>`
+
+### `Result::err()`
+
+Returns the "err" value or `undefined`.
+
+- Returns: `<*>`
+
+### `Result::expect([message])`
+
+Ensures this `Result` to contain a valid (ok) value.
+Returns a new `Result` object.
+
+- `[message]` `<String>`
+- Returns: `<Result>`
+
+### `Result::expectErr([message])`
+
+Ensures this `Result` to contain an error.
+Returns a new `Result` object.
+
+- `[message]` `<String>`
+- Returns: `<Result>`
+
+### `Result::map(fn)`
+
+Maps the "ok" value (if any) into something else.
+Returns a new `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::mapErr(fn)`
+
+Maps the "err" value (if any) into something else.
+Returns a new `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::andThen(fn)`
+
+Maps the "ok" value (if any) into another `Result`.
+Throws if the function doesn't return a valid `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<Result>`
+- Returns: `<Result>`
+
+### `Result::orElse(fn)`
+
+Maps the "err" value (if any) into another `Result`.
+Throws if the function doesn't return a valid `Result` object.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<Result>`
+- Returns: `<Result>`
+
+### `Result::and(target)`
+
+Logical AND operator.
+Returns the first "err" `Result` between this and the argument.
+
+- `target` `<Result>`
+- Returns: `<Result>`
+
+### `Result::or(target)`
+
+Logical OR operator.
+Returns the first "ok" `Result` between this and the argument.
+
+- `target` `<Result>`
+- Returns: `<Result>`
+
+### `Result::tap(fn)`
+
+Perform a side-effect with the "ok" value.
+The `Result` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`
+
+### `Result::tapErr(fn)`
+
+Perform a side-effect with the "err" value.
+The `Result` status will left untouched.
+
+- `fn` `<Function>`
+  - `value` `<*>`
+  - Returns: `<*>`
+- Returns: `<Result>`

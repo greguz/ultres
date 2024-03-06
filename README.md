@@ -20,6 +20,9 @@ Yup.
 - **ESM**: native ESM package
 - **CommonJS**: support for older runtimes
 - **TypeScript**: first-class support
+- **ES6**: only used ES6 features
+- **Familiar APIs**: most of the idea were stolen from [Rust](https://doc.rust-lang.org/std/result/)
+- **Promise support**: added `Promise`/`async` support with the `AsyncResult` lib (see docs)
 
 ## Install
 
@@ -27,7 +30,7 @@ Yup.
 npm i ultres
 ```
 
-## Example
+## Quick example
 
 ```javascript
 import Result from 'ultres'
@@ -74,6 +77,10 @@ const errInstance = await AsyncResult.ok(Promise.reject(new Error('Oh no')))
 
 console.log(errInstance.message) // Oh no
 ```
+
+## Docs
+
+See [docs website](https://greguz.github.io/ultres/).
 
 ## Donate
 
