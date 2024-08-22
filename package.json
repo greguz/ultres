@@ -1,6 +1,6 @@
 {
   "name": "ultres",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Flexible and functional `Result` type for handling success and error cases.",
   "type": "module",
   "files": [
