@@ -43,8 +43,6 @@ no.ok()         // undefined
 no.err()        // 'Oh no'
 ```
 
-> **WARNING**: A `Result` instance should always be consumed (see the [side effects](#side-effects) section).
-
 ## Expectations
 
 Those methods are similar to `.unwrap()` and `.unwrapErr()`. They let you access the interval value with an active check, but also let you to customize the error message.
@@ -55,9 +53,9 @@ All methods return a new (immutable) `Result` instance.
 const message = 'I was expecting something else'
 
 yes.expect(message)     // nothing changes
-yes.expectErr(message)  // Error: Expected err Result (error thrown)
+yes.expectErr(message)  // Error: I was expecting something else (error thrown)
 
-no.expect(message)      // Error: Expected ok Result (error thrown)
+no.expect(message)      // Error: I was expecting something else (error thrown)
 no.expectErr(message)   // nothing changes
 ```
 
@@ -134,7 +132,7 @@ no.tap(log).unwrapErr()     // nothing happens
 no.tapErr(log).unwrapErr()  // logs 'My value: Oh no'
 ```
 
-> **WARNING**: The side effect won't run if the `Result` is **not** consumed.
+> **WARNING**: The side effect will run instantly.
 
 ## API
 

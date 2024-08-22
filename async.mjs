@@ -1,94 +1,177 @@
 import Result from './result.mjs'
 
-const ultres = Symbol.for('ultres/async')
+const symUltresAsync = Symbol.for('ultres/async')
 
-const is = value => ultres in Object(value)
+function isAsyncResult (value) {
+  return symUltresAsync in Object(value)
+}
 
-const from = value => Promise.resolve(value).then(
-  obj => is(obj) ? obj.unwrapResult() : obj
-)
+function isPromise (value) {
+  return typeof Object(value).then === 'function'
+}
 
-const passthrough = v => v
+function from (value) {
+  if (isPromise(value)) {
+    return value.then(from)
+  }
+  if (isAsyncResult(value)) {
+    return value.unwrapResult()
+  }
+  if (Result.is(value)) {
+    return Promise.resolve(value)
+  }
+  return Promise.resolve(value)
+}
 
-const rUnwrap = r => r.unwrap()
+class AsyncResult {
+  get [symUltresAsync] () {
+    return true
+  }
 
-const rUnwrapErr = r => r.unwrapErr()
+  get [Symbol.toStringTag] () {
+    return 'AsyncResult'
+  }
 
-const rOk = r => r.ok()
+  constructor (promise) {
+    // TODO: use private property (#raw)
+    this._raw = promise
+  }
 
-const rErr = r => r.err()
+  unwrap () {
+    return this._raw.then(r => r.unwrap())
+  }
 
-const wrap = promise => ({
-  [Symbol.toStringTag]: 'AsyncResult',
-  [ultres]: true,
-  unwrap: () => promise.then(rUnwrap),
-  unwrapErr: () => promise.then(rUnwrapErr),
-  ok: () => promise.then(rOk),
-  err: () => promise.then(rErr),
-  expect: message => wrap(promise.then(r => r.expect(message))),
-  expectErr: message => wrap(promise.then(r => r.expectErr(message))),
-  map: fn => wrap(
-    promise.then(
-      r => r.isOk
-        ? Promise.resolve(fn(r.unwrap())).then(Result.ok)
-        : r
+  unwrapErr () {
+    return this._raw.then(r => r.unwrapErr())
+  }
+
+  ok () {
+    return this._raw.then(r => r.ok())
+  }
+
+  err () {
+    return this._raw.then(r => r.err())
+  }
+
+  expect (message) {
+    return new AsyncResult(
+      this._raw.then(r => r.expect(message))
     )
-  ),
-  mapErr: fn => wrap(
-    promise.then(
-      r => r.isErr
-        ? Promise.resolve(fn(r.unwrapErr())).then(Result.err)
-        : r
-    )
-  ),
-  andThen: fn => wrap(
-    promise.then(
-      r => r.isOk
-        ? from(fn(r.unwrap())).then(r.and)
-        : r
-    )
-  ),
-  orElse: fn => wrap(
-    promise.then(
-      r => r.isErr
-        ? from(fn(r.unwrapErr())).then(r.or)
-        : r
-    )
-  ),
-  and: target => wrap(
-    Promise.all([promise, from(target)]).then(
-      ([left, right]) => left.and(right)
-    )
-  ),
-  or: target => wrap(
-    Promise.all([promise, from(target)]).then(
-      ([left, right]) => left.or(right)
-    )
-  ),
-  tap: fn => wrap(
-    promise.then(
-      r => r.isOk
-        ? Promise.resolve(fn(r.unwrap())).then(() => r)
-        : r
-    )
-  ),
-  tapErr: fn => wrap(
-    promise.then(
-      r => r.isErr
-        ? Promise.resolve(fn(r.unwrapErr())).then(() => r)
-        : r
-    )
-  ),
-  unwrapResult: () => promise,
-  catchRejection: () => wrap(promise.then(passthrough, Result.err))
-})
+  }
 
-const ok = value => is(value)
-  ? value
-  : wrap(from(value).then(Result.ok))
+  expectErr (message) {
+    return new AsyncResult(
+      this._raw.then(r => r.expectErr(message))
+    )
+  }
 
-const err = value => is(value)
-  ? value
-  : wrap(from(value).then(Result.err))
+  map (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isOk
+          ? from(fn(r.unwrap())).then(Result.ok)
+          : r
+      )
+    )
+  }
 
-export default { err, is, ok }
+  mapErr (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isErr
+          ? from(fn(r.unwrapErr())).then(Result.err)
+          : r
+      )
+    )
+  }
+
+  andThen (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isOk
+          ? from(fn(r.unwrap())).then(r.and)
+          : r
+      )
+    )
+  }
+
+  orElse (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isErr
+          ? from(fn(r.unwrapErr())).then(r.or)
+          : r
+      )
+    )
+  }
+
+  and (target) {
+    return new AsyncResult(
+      Promise.all([this._raw, from(target)]).then(
+        ([left, right]) => left.and(right)
+      )
+    )
+  }
+
+  or (target) {
+    return new AsyncResult(
+      Promise.all([this._raw, from(target)]).then(
+        ([left, right]) => left.or(right)
+      )
+    )
+  }
+
+  tap (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isOk
+          ? Promise.resolve(fn(r.unwrap())).then(() => r)
+          : r
+      )
+    )
+  }
+
+  tapErr (fn) {
+    return new AsyncResult(
+      this._raw.then(
+        r => r.isErr
+          ? Promise.resolve(fn(r.unwrapErr())).then(() => r)
+          : r
+      )
+    )
+  }
+
+  unwrapResult () {
+    return this._raw
+  }
+
+  catchRejection () {
+    return new AsyncResult(
+      this._raw.then(Result.ok, Result.err)
+    )
+  }
+}
+
+function asyncOk (value) {
+  if (isAsyncResult(value)) {
+    return value
+  }
+  return new AsyncResult(
+    from(value).then(Result.ok)
+  )
+}
+
+function asyncErr (value) {
+  if (isAsyncResult(value)) {
+    return value
+  }
+  return new AsyncResult(
+    from(value).then(Result.err)
+  )
+}
+
+export default {
+  err: asyncErr,
+  is: isAsyncResult,
+  ok: asyncOk
+}

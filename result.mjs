@@ -1,77 +1,194 @@
-const ultres = Symbol.for('ultres')
+const symUltres = Symbol.for('ultres')
 
-const nothing = () => undefined
+function isResult (value) {
+  return symUltres in Object(value)
+}
 
-const is = value => ultres in Object(value)
+function ensureResult (value) {
+  if (!isResult(value)) {
+    throw new TypeError('Expected a Result')
+  }
+  return value
+}
 
-const stop = message => { throw new Error(message) }
-
-const ensure = value => is(value) ? value : stop('Expected a Result')
-
-const wasOk = () => stop('Result is ok')
-
-const expectedErr = message => stop(message || 'Expected err Result')
-
-const wasErr = () => stop('Result is err')
-
-const expectedOk = message => stop(message || 'Expected ok Result')
-
-const ok = value => {
-  if (is(value)) {
-    return value
+class Ok {
+  static from (value) {
+    if (isResult(value)) {
+      return value
+    } else {
+      return new Ok(value)
+    }
   }
 
-  const eject = () => value
-  const copy = () => ok(value)
-  return {
-    [Symbol.toStringTag]: 'Result',
-    [ultres]: true,
-    isErr: false,
-    isOk: true,
-    unwrap: eject,
-    unwrapErr: wasOk,
-    ok: eject,
-    err: nothing,
-    expect: copy,
-    expectErr: expectedErr,
-    map: fn => ok(fn(value)),
-    mapErr: copy,
-    andThen: fn => ensure(fn(value)),
-    orElse: copy,
-    and: ensure,
-    or: copy,
-    tap: fn => { fn(value); return copy() },
-    tapErr: copy
+  get isErr () {
+    return false
+  }
+
+  get isOk () {
+    return true
+  }
+
+  get [symUltres] () {
+    return true
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'Result'
+  }
+
+  constructor (value) {
+    // TODO: use private property (#raw)
+    this._raw = value
+  }
+
+  unwrap () {
+    return this._raw
+  }
+
+  unwrapErr () {
+    throw new Error('Result is ok')
+  }
+
+  ok () {
+    return this._raw
+  }
+
+  err () {
+    return undefined
+  }
+
+  expect () {
+    return this
+  }
+
+  expectErr (message = 'Expected err Result') {
+    throw new Error(message)
+  }
+
+  map (fn) {
+    return new Ok(fn(this._raw))
+  }
+
+  mapErr () {
+    return this
+  }
+
+  andThen (fn) {
+    return ensureResult(fn(this._raw))
+  }
+
+  orElse () {
+    return this
+  }
+
+  and (obj) {
+    return ensureResult(obj)
+  }
+
+  or () {
+    return this
+  }
+
+  tap (fn) {
+    fn(this._raw)
+    return this
+  }
+
+  tapErr () {
+    return this
   }
 }
 
-const err = value => {
-  if (is(value)) {
-    return value
+class Err {
+  static from (value) {
+    if (isResult(value)) {
+      return value
+    } else {
+      return new Err(value)
+    }
   }
 
-  const eject = () => value
-  const copy = () => err(value)
-  return {
-    [Symbol.toStringTag]: 'Result',
-    [ultres]: true,
-    isErr: true,
-    isOk: false,
-    unwrap: wasErr,
-    unwrapErr: eject,
-    ok: nothing,
-    err: eject,
-    expect: expectedOk,
-    expectErr: copy,
-    map: copy,
-    mapErr: fn => err(fn(value)),
-    andThen: copy,
-    orElse: fn => ensure(fn(value)),
-    and: copy,
-    or: ensure,
-    tap: copy,
-    tapErr: fn => { fn(value); return copy() }
+  get isErr () {
+    return true
+  }
+
+  get isOk () {
+    return false
+  }
+
+  get [symUltres] () {
+    return true
+  }
+
+  get [Symbol.toStringTag] () {
+    return 'Result'
+  }
+
+  constructor (value) {
+    // TODO: use private property (#raw)
+    this._raw = value
+  }
+
+  unwrap () {
+    throw new Error('Result is err')
+  }
+
+  unwrapErr () {
+    return this._raw
+  }
+
+  ok () {
+    return undefined
+  }
+
+  err () {
+    return this._raw
+  }
+
+  expect (message = 'Expected ok Result') {
+    throw new Error(message)
+  }
+
+  expectErr () {
+    return this
+  }
+
+  map () {
+    return this
+  }
+
+  mapErr (fn) {
+    return new Err(fn(this._raw))
+  }
+
+  andThen () {
+    return this
+  }
+
+  orElse (fn) {
+    return ensureResult(fn(this._raw))
+  }
+
+  and () {
+    return this
+  }
+
+  or (obj) {
+    return ensureResult(obj)
+  }
+
+  tap () {
+    return this
+  }
+
+  tapErr (fn) {
+    fn(this._raw)
+    return this
   }
 }
 
-export default { err, is, ok }
+export default {
+  err: Err.from,
+  is: isResult,
+  ok: Ok.from
+}

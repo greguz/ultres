@@ -16,7 +16,6 @@ Yup.
 ## Why
 
 - **Zero dependencies**: banana only, no gorilla or jungle whatsoever
-- **FP**: source is just a set of dead-simple closures
 - **ESM**: native ESM package
 - **CommonJS**: support for older runtimes
 - **TypeScript**: first-class support
@@ -67,9 +66,9 @@ const process = async value => {
 
 const date = await AsyncResult.ok(integer(2))
   .andThen(process)
-  .unwrap() // logs 'process 2 items'
+  .unwrap() // process 2 items
 
-console.log(date) // 2023-11-30T13:25:59.196Z
+console.log(date) // 2024-08-22T15:19:04.830Z
 
 const errInstance = await AsyncResult.ok(Promise.reject(new Error('Oh no')))
   .catchRejection()
